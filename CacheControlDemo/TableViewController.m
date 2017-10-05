@@ -79,7 +79,11 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView
          cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"album"];
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"album"];
+    
+    if (NULL == cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"album"];
+    }
     
     [self configureCell:cell forRowAtIndexPath:indexPath];
     
