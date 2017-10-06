@@ -8,8 +8,8 @@
 
 #import <AFNetworking.h>
 
-#import "TableViewController.h"
 #import "DetailViewController.h"
+#import "TableViewController.h"
 
 @interface TableViewController ()
 
@@ -21,9 +21,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+
     self.navigationItem.title = @"Photos";
-    
+
     // Initialize the refresh control.
     self.refreshControl = [[UIRefreshControl alloc] init];
     self.refreshControl.backgroundColor = [UIColor purpleColor];
@@ -31,7 +31,7 @@
     [self.refreshControl addTarget:self
                             action:@selector(getLatestPhotos)
                   forControlEvents:UIControlEventValueChanged];
-    
+
     [self getLatestPhotos];
 }
 
@@ -41,27 +41,30 @@
 }
 
 - (void)getLatestPhotos {
-    
+
     NSURLCache *sharedCache = [[NSURLCache alloc] initWithMemoryCapacity:2 * 1024 * 1024
                                                             diskCapacity:100 * 1024 * 1024
                                                                 diskPath:nil];
     [NSURLCache setSharedURLCache:sharedCache];
-    
+
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     AFHTTPSessionManager *manager = [[AFHTTPSessionManager alloc] initWithSessionConfiguration:configuration];
     manager.responseSerializer = [[AFJSONResponseSerializer alloc] init];
-    
-    [manager GET:@"https://jsonplaceholder.typicode.com/photos" parameters:nil progress:nil
-         success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
-             NSLog(@"JSON: %@", responseObject);
-             NSLog(@"DiskCache: %@ of %@", @([[NSURLCache sharedURLCache] currentDiskUsage]), @([[NSURLCache sharedURLCache] diskCapacity]));
-             NSLog(@"MemoryCache: %@ of %@", @([[NSURLCache sharedURLCache] currentMemoryUsage]), @([[NSURLCache sharedURLCache] memoryCapacity]));
-             self.photos = responseObject;
-             [self.refreshControl endRefreshing];
-             [self.tableView reloadData];
-         } failure:^(NSURLSessionDataTask * _Nullable task, NSError * _Nonnull error) {
-             NSLog(@"Error: %@", error);
-         }];
+
+    [manager GET:@"https://jsonplaceholder.typicode.com/photos"
+        parameters:nil
+        progress:nil
+        success:^(NSURLSessionDataTask *_Nonnull task, id _Nullable responseObject) {
+          NSLog(@"JSON: %@", responseObject);
+          NSLog(@"DiskCache: %@ of %@", @([[NSURLCache sharedURLCache] currentDiskUsage]), @([[NSURLCache sharedURLCache] diskCapacity]));
+          NSLog(@"MemoryCache: %@ of %@", @([[NSURLCache sharedURLCache] currentMemoryUsage]), @([[NSURLCache sharedURLCache] memoryCapacity]));
+          self.photos = responseObject;
+          [self.refreshControl endRefreshing];
+          [self.tableView reloadData];
+        }
+        failure:^(NSURLSessionDataTask *_Nullable task, NSError *_Nonnull error) {
+          NSLog(@"Error: %@", error);
+        }];
 }
 
 #pragma mark - UITableViewDataSource
@@ -71,35 +74,32 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView
- numberOfRowsInSection:(NSInteger)section
-{
+    numberOfRowsInSection:(NSInteger)section {
     return [self.photos count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView
-         cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
+         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"album"];
-    
+
     if (NULL == cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"album"];
     }
-    
+
     [self configureCell:cell forRowAtIndexPath:indexPath];
-    
+
     return cell;
 }
 
 - (void)configureCell:(UITableViewCell *)cell
-    forRowAtIndexPath:(NSIndexPath *)indexPath
-{
+    forRowAtIndexPath:(NSIndexPath *)indexPath {
     NSDictionary *photoInfo = [self.photos objectAtIndex:indexPath.row];
     NSString *imageThumbnailURLString = [photoInfo objectForKey:@"thumbnailUrl"];
     NSString *imageTitle = [photoInfo objectForKey:@"title"];
 
-    NSURL * imageURL = [NSURL URLWithString:imageThumbnailURLString];
-    NSData * imageData = [NSData dataWithContentsOfURL:imageURL];
-    UIImage * image = [UIImage imageWithData:imageData];
+    NSURL *imageURL = [NSURL URLWithString:imageThumbnailURLString];
+    NSData *imageData = [NSData dataWithContentsOfURL:imageURL];
+    UIImage *image = [UIImage imageWithData:imageData];
     cell.imageView.image = image;
     cell.textLabel.text = imageTitle;
 }
@@ -107,8 +107,7 @@
 #pragma mark - UITableViewDelegate
 
 - (void)tableView:(UITableView *)tableView
-didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
+    didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     NSDictionary *photoInfo = [self.photos objectAtIndex:indexPath.row];
 
     DetailViewController *detailVC = [[DetailViewController alloc] init];
@@ -116,6 +115,5 @@ didSelectRowAtIndexPath:(NSIndexPath *)indexPath
     detailVC.imageURL = [photoInfo objectForKey:@"url"];
     [self.navigationController pushViewController:detailVC animated:YES];
 }
-
 
 @end
